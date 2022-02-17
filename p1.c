@@ -1,59 +1,46 @@
 /* Shared memory program
-   */
+ */
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <string.h>
+#define SIZE 20
+int i = 0;
 
-
-
+int shmd;
+//char *data;
 
 int main()
 {
-    /* code */
-    FILE* fd;
-    //int *count;
-    char buff[100] = {'/0'};
-    char *s1;
+     char string[SIZE];
 
-    fd = fopen("/home/rohan/Desktop/EOS_EXAM_0010/dictionary.txt","r");
+    shmd = shm_open("/cdacshm", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);                     // it is of path name , flags ,mode(we used as user call f'n)
+    ftruncate(shmd, sizeof(char));                                                                  // file named by path & sizeof length
+    string[SIZE] = (char *)mmap(NULL, sizeof(char), PROT_READ | PROT_WRITE, MAP_SHARED, shmd, 0); // virtual address space of the calling process IT HASaddress.length,prot,flags,fd,offset.
 
-    if(fd == NULL)
+
+
+   
+    FILE *fp=fopen("dictionary.txt", "r");
+
+    if (fp==NULL)
     {
-      printf("Error loading file!");
+        printf("File opening Error!!");
     }
-
-    int shmd;
-    shmd = shm_open("/cdacshm", O_RDWR | O_CREAT , S_IRUSR | S_IWUSR);// it is of path name , flags ,mode(we used as user call f'n)
-    ftruncate(shmd,100); //file named by path & sizeof length
-    s1 = (char *)mmap(NULL,100,PROT_READ | PROT_WRITE,MAP_SHARED,shmd,0);//virtual address space of the calling process IT HASaddress.length,prot,flags,fd,offset.
+    while(fgets(string,SIZE,fp)!=NULL)
+         if(string[0]=='m'||string[0]=='M')
+         {
+             i++;
+             printf("%s %d",string,i);
+         }
     
-
-      while (fgets(buff,100,fd)!= NULL)
-      {
-        /* code */
-        if(buff[0] == 'm')
-        {
-          while (1)
-          {
-            
-            /* code */
-            printf("%s",buff);
-         
-          }
-
-          
-          
-        }
-      }     
     
-     /* printf("Enter the string starting letter: ");
-      scanf("%s",str);
-     str[1000] = *count;  */
-       
-      fclose(fd);
+    printf("\nsucessfull");
+    fclose(fp);
     return 0;
 }
